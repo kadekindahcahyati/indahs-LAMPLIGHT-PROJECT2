@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#05070b">
+  <title>LAMPLIGHT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Dunia 3D -->
+  <canvas id="scene" aria-hidden="true"></canvas>
+
+  <!-- Lapisan sinematik -->
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="letterbox top" aria-hidden="true"></div>
+  <div class="letterbox bottom" aria-hidden="true"></div>
+
+  <!-- Title screen -->
+  <main id="title" hidden>
+    <div class="title-shade" aria-hidden="true"></div>
+    <div class="title-block">
+      <h1 class="logo">LAMPLIGHT</h1>
+      <button id="btn-start" class="start" type="button"><span>START</span></button>
+    </div>
+    <p class="title-meta">Prototipe 0.2, tahap 2: grafis &amp; kontrol pemain</p>
+    <button id="btn-quality" class="quality" type="button" title="Ganti kualitas grafis (halaman dimuat ulang)">
+      Grafis: <span id="quality-label">Otomatis</span>
+    </button>
+  </main>
+
+  <!-- Crosshair (hanya tampil saat bermain) -->
+  <div id="crosshair" aria-hidden="true"></div>
+
+  <!-- HUD minimal (petunjuk) -->
+  <div id="hud" role="status" aria-live="polite"></div>
+
+  <!-- Menu jeda (Esc saat bermain) -->
+  <section id="pause" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="pause-card">
+      <h2 id="pause-title">Jeda</h2>
+      <div class="pause-actions">
+        <button id="btn-resume" class="pbtn primary" type="button">Lanjutkan</button>
+        <button id="btn-title" class="pbtn" type="button">Kembali ke Judul</button>
+      </div>
+      <div class="pause-opts">
+        <label class="opt"><span>Sensitivitas mouse</span>
+          <input id="sens" type="range" min="0.3" max="2.5" step="0.05" value="1"><output id="sens-val">1,00×</output></label>
+        <label class="opt check"><input id="inv-y" type="checkbox"><span>Balik sumbu Y (lihat atas/bawah)</span></label>
+      </div>
+      <dl class="keys">
+        <div><dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Berjalan</dd></div>
+        <div><dt><kbd>Shift</kbd></dt><dd>Tahan untuk berlari</dd></div>
+        <div><dt><kbd>Spasi</kbd></dt><dd>Melompat (gravitasi Bulan)</dd></div>
+        <div><dt>Mouse</dt><dd>Melihat sekeliling</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Jeda / lanjutkan</dd></div>
+        <div><dt><kbd>F3</kbd></dt><dd>Info performa</dd></div>
+      </dl>
+    </div>
+  </section>
+  <pre id="stats" hidden></pre>
+
+  <!-- Loading -->
+  <section id="loading" aria-live="polite">
+    <p id="load-text">Memuat…</p>
+    <div class="load-track"><i id="load-bar"></i></div>
+  </section>
+
+  <!-- Error fatal -->
+  <section id="fatal" hidden role="alert">
+    <h2>Game tidak bisa dimulai</h2>
+    <p id="fatal-msg"></p>
+    <p class="fatal-hint">Coba Chrome, Edge, atau Firefox versi terbaru dan pastikan akselerasi perangkat keras aktif.</p>
+  </section>
+
+  <noscript><p class="noscript">LAMPLIGHT membutuhkan JavaScript.</p></noscript>
+
+  <script src="dist/lamplight.js" defer></script>
+</body>
+</html>

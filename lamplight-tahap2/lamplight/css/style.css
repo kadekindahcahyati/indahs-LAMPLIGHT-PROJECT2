@@ -1,0 +1,257 @@
+/* LAMPLIGHT — gaya UI (title, loading, HUD). Tanpa font/aset eksternal.
+   Palet:  hampa #05070b · regolit #a9a7a3 · earthshine #6f93c8 · lampu #ffb347 · bohlam #ffe2b0 */
+
+:root {
+  --void: #05070b;
+  --regolith: #a9a7a3;
+  --earthshine: #6f93c8;
+  --lamp: #ffb347;
+  --bulb: #ffe2b0;
+  --ink: #e9e6df;
+  --font: "Segoe UI Variable Display", "Segoe UI", "Avenir Next", "Helvetica Neue", "Noto Sans", system-ui, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --bar: 7vh;               /* tinggi letterbox */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+}
+
+/* ------------------------------------------------------------ lapisan sinematik */
+.vignette {
+  position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 55%, transparent 52%, rgba(2, 3, 6, 0.55) 100%);
+}
+.letterbox {
+  position: fixed; left: 0; right: 0; height: var(--bar);
+  background: #000; pointer-events: none; z-index: 5;
+  transition: transform 1.6s cubic-bezier(.65, 0, .25, 1);
+}
+.letterbox.top    { top: 0;    transform: translateY(-100%); }
+.letterbox.bottom { bottom: 0; transform: translateY(100%); }
+body.cinematic .letterbox.top,
+body.cinematic .letterbox.bottom { transform: none; }
+
+/* ------------------------------------------------------------ title screen */
+#title {
+  position: fixed; inset: 0; z-index: 4;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+#title.visible { opacity: 1; }
+
+/* Peredam di bagian bawah: judul duduk di "tanah" foreground (di bawah cakrawala), bukan di atas stasiun. */
+.title-shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(0deg, rgba(3, 5, 9, 0.82) 0%, rgba(3, 5, 9, 0.55) 30%, transparent 55%),
+    linear-gradient(90deg, rgba(3, 5, 9, 0.35) 0%, transparent 40%);
+}
+
+.title-block {
+  position: absolute;
+  left: clamp(24px, 7vw, 120px);
+  bottom: calc(var(--bar) + clamp(44px, 9.5vh, 110px));
+  max-width: calc(100vw - 48px);
+}
+
+.logo {
+  margin: 0;
+  font-weight: 200;
+  font-size: clamp(38px, 6.8vw, 112px);
+  line-height: 1;
+  letter-spacing: 0.3em;
+  margin-right: -0.3em;               /* kompensasi spasi huruf terakhir */
+  color: #cfd6e2;                     /* putih dingin: cahaya Bumi */
+  opacity: 0;
+  white-space: nowrap;
+}
+/* Satu momen orkestrasi: judul menyala seperti lampu tua — berkedip, lalu stabil hangat. */
+#title.visible .logo { animation: ignite 3.2s steps(1, end) 0.5s forwards; }
+@keyframes ignite {
+  0%   { opacity: 0;    color: #6c7686; text-shadow: none; }
+  6%   { opacity: 0.85; color: #8e97a6; }
+  9%   { opacity: 0.08; }
+  15%  { opacity: 0.7; }
+  17%  { opacity: 0.12; }
+  27%  { opacity: 1;    color: #b9c0cc; text-shadow: 0 0 22px rgba(255, 179, 71, 0.18); }
+  31%  { opacity: 0.5; }
+  35%  { opacity: 1;    color: #d9dde5; text-shadow: 0 0 30px rgba(255, 179, 71, 0.28), 0 0 90px rgba(255, 179, 71, 0.14); }
+  100% { opacity: 1;    color: #dfe1e4; text-shadow: 0 0 34px rgba(255, 190, 100, 0.30), 0 0 110px rgba(255, 179, 71, 0.16); }
+}
+
+/* START: teks polos + "filamen" tipis di bawahnya; menyala saat disorot / fokus */
+.start {
+  position: relative;
+  margin-top: clamp(16px, 3.5vh, 40px);
+  padding: 14px 6px 16px 0;
+  min-width: 12ch;
+  background: none; border: 0; cursor: pointer;
+  font: inherit; font-weight: 300;
+  font-size: clamp(15px, 1.5vw, 20px);
+  letter-spacing: 0.5em;
+  text-align: left;
+  color: var(--regolith);
+  opacity: 0;
+  transition: color 0.35s ease, text-shadow 0.35s ease;
+}
+#title.visible .start { animation: fade-in 1.2s ease 2.6s forwards; }
+@keyframes fade-in { to { opacity: 1; } }
+
+.start::after {
+  content: ""; position: absolute; left: 0; bottom: 0;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, var(--lamp), rgba(255, 179, 71, 0.15));
+  transform: scaleX(0.28); transform-origin: left;
+  opacity: 0.55;
+  transition: transform 0.6s cubic-bezier(.2, .7, .2, 1), opacity 0.35s ease;
+}
+.start:hover, .start:focus-visible { color: var(--bulb); text-shadow: 0 0 18px rgba(255, 179, 71, 0.55); }
+.start:hover::after, .start:focus-visible::after { transform: scaleX(1); opacity: 1; }
+.start:focus-visible, .quality:focus-visible { outline: 1px solid var(--lamp); outline-offset: 6px; }
+
+.title-meta {
+  position: absolute; left: clamp(24px, 7vw, 120px); bottom: calc(var(--bar) + 20px);
+  margin: 0;
+  font-size: 12px; letter-spacing: 0.06em;
+  color: rgba(169, 167, 163, 0.55);
+}
+.quality {
+  position: absolute; right: clamp(24px, 4vw, 64px); bottom: calc(var(--bar) + 16px);
+  background: none; border: 0; padding: 6px 2px; cursor: pointer;
+  font: inherit; font-size: 12px; letter-spacing: 0.06em;
+  color: rgba(169, 167, 163, 0.6);
+  transition: color 0.25s ease;
+}
+.quality:hover { color: var(--bulb); }
+.quality span { color: var(--earthshine); }
+
+/* ------------------------------------------------------------ HUD */
+#hud {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+  z-index: 3; max-width: calc(100vw - 40px);
+  padding: 8px 18px;
+  font-size: 13px; letter-spacing: 0.04em; text-align: center;
+  color: rgba(233, 230, 223, 0.82);
+  background: rgba(5, 7, 11, 0.55);
+  border-radius: 2px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 1s ease;
+}
+#hud.visible { opacity: 1; }
+
+#stats {
+  position: fixed; top: 10px; left: 12px; z-index: 20; margin: 0;
+  font: 12px/1.45 var(--mono);
+  color: #9fe3a8; text-shadow: 0 1px 2px #000;
+  pointer-events: none; white-space: pre;
+}
+
+/* ------------------------------------------------------------ bermain: crosshair, menu jeda (Tahap 2) */
+#crosshair {
+  position: fixed; left: 50%; top: 50%; z-index: 3;
+  width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%;
+  background: rgba(233, 230, 223, 0.8);
+  box-shadow: 0 0 0 1px rgba(5, 7, 11, 0.55), 0 0 8px rgba(255, 226, 176, 0.35);
+  opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+}
+body.playing:not(.paused) #crosshair { opacity: 1; }
+body.playing:not(.paused) #scene { cursor: none; }
+body.playing.dragmode:not(.paused) #scene { cursor: grab; }
+body.playing.dragmode:not(.paused) #crosshair { opacity: 0.5; }
+
+#pause {
+  position: fixed; inset: 0; z-index: 12;
+  display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(3, 5, 9, 0.55) 0%, rgba(3, 5, 9, 0.82) 100%);
+  opacity: 0; transition: opacity 0.35s ease;
+}
+#pause.visible { opacity: 1; }
+.pause-card { width: min(460px, 100%); display: flex; flex-direction: column; gap: 22px; }
+.pause-card h2 {
+  margin: 0; font-weight: 200; font-size: clamp(26px, 4vw, 40px);
+  letter-spacing: 0.34em; color: #cfd6e2; text-shadow: 0 0 30px rgba(255, 190, 100, 0.22);
+}
+.pause-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.pbtn {
+  position: relative; background: none; border: 0; cursor: pointer; padding: 10px 2px;
+  font: inherit; font-weight: 300; font-size: 16px; letter-spacing: 0.32em; text-transform: uppercase; text-align: left;
+  color: var(--regolith); transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.pbtn.primary { color: var(--bulb); }
+.pbtn:hover, .pbtn:focus-visible { color: var(--bulb); text-shadow: 0 0 16px rgba(255, 179, 71, 0.5); }
+.pbtn:focus-visible, #sens:focus-visible, #inv-y:focus-visible { outline: 1px solid var(--lamp); outline-offset: 5px; }
+.pause-opts { display: flex; flex-direction: column; gap: 12px; color: rgba(233, 230, 223, 0.8); font-size: 14px; }
+.opt { display: grid; grid-template-columns: 1fr minmax(120px, 200px) 5ch; align-items: center; gap: 12px; }
+.opt.check { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+.opt output { font-family: var(--mono); font-size: 12px; color: var(--earthshine); text-align: right; }
+#sens { width: 100%; accent-color: var(--lamp); }
+#inv-y { accent-color: var(--lamp); width: 16px; height: 16px; }
+.keys { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; font-size: 13px; color: rgba(169, 167, 163, 0.85); }
+.keys div { display: flex; flex-direction: column; gap: 2px; }
+.keys dt { color: rgba(233, 230, 223, 0.9); }
+.keys dd { margin: 0; }
+kbd {
+  display: inline-block; min-width: 1.7em; padding: 1px 6px; margin-right: 4px; text-align: center;
+  font: 12px var(--mono); color: var(--bulb); border: 1px solid rgba(255, 226, 176, 0.35); border-radius: 3px;
+  background: rgba(255, 226, 176, 0.06);
+}
+@media (max-width: 520px) { .keys { grid-template-columns: 1fr; } .opt { grid-template-columns: 1fr; } }
+
+/* ------------------------------------------------------------ loading */
+#loading {
+  position: fixed; inset: 0; z-index: 30;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  background: var(--void);
+  transition: opacity 0.9s ease;
+}
+#loading.done { opacity: 0; pointer-events: none; }
+#load-text { margin: 0; font-size: 13px; font-weight: 300; letter-spacing: 0.16em; color: var(--regolith); }
+.load-track { width: min(280px, 60vw); height: 1px; background: rgba(169, 167, 163, 0.18); overflow: hidden; }
+.load-track i {
+  display: block; height: 100%; background: var(--lamp);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.35s ease;
+  box-shadow: 0 0 10px rgba(255, 179, 71, 0.7);
+}
+
+/* ------------------------------------------------------------ error */
+#fatal {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 24px; text-align: center; background: var(--void);
+}
+#fatal h2 { margin: 0; font-weight: 300; font-size: clamp(22px, 3vw, 32px); color: var(--bulb); }
+#fatal p { margin: 0; max-width: 52ch; line-height: 1.55; color: var(--regolith); }
+#fatal .fatal-hint { font-size: 14px; color: rgba(169, 167, 163, 0.65); }
+.noscript { position: fixed; inset: 0; z-index: 50; margin: 0; display: grid; place-items: center; background: var(--void); color: var(--ink); }
+
+/* ------------------------------------------------------------ layar sempit & preferensi */
+@media (max-width: 640px) {
+  .logo { letter-spacing: 0.18em; margin-right: -0.18em; }
+  .title-shade { background: linear-gradient(0deg, rgba(3, 5, 9, 0.85) 0%, rgba(3, 5, 9, 0.3) 55%, transparent 80%); }
+  .quality { bottom: auto; top: 16px; right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #title.visible .logo { animation: none; opacity: 1; color: #dfe1e4; text-shadow: 0 0 34px rgba(255, 190, 100, 0.3); }
+  #title.visible .start { animation: none; opacity: 1; }
+  .letterbox, #title, #hud, #loading, #pause, #crosshair { transition-duration: 0.01s; }
+}
